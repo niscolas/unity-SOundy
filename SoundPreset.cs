@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using Assets.Plugins.AudioUtils;
 using NaughtyAttributes;
+using Plugins.ClassExtensions.UnityExtensions;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
 namespace Plugins.AudioUtils {
-	[Serializable]
-	public class SoundPreset {
+	[CreateAssetMenu(
+		menuName = "Sound Preset", order = Constants.CreateAssetMenuOrder)]
+	public class SoundPreset : ScriptableObject {
 		[SerializeField]
 		private AudioClip clip;
 
@@ -24,8 +29,12 @@ namespace Plugins.AudioUtils {
 		[SerializeField]
 		private Vector3Reference position;
 
+		[FormerlySerializedAs("delayTime")]
 		[SerializeField]
-		private FloatReference delayTime;
+		private FloatReference delay;
+
+		[SerializeField]
+		private FloatReference delayBetweenPlays;
 
 		[SerializeField]
 		private AudioRolloffMode rolloffMode;
@@ -36,22 +45,83 @@ namespace Plugins.AudioUtils {
 		[SerializeField]
 		private bool loop;
 
-		public AudioClip Clip => clip;
+		private static readonly Dictionary<SoundPreset, float> ClipLastTimePlayed = new Dictionary<SoundPreset, float>();
 
-		public AudioMixerGroup AudioMixerGroup => audioMixerGroup;
+		private static int _counter;
 
-		public Vector2 Volume => volume;
+		public void Play() {
+			if (!CanPlay()) {
+				return;
+			}
 
-		public Vector2 Pitch => pitch;
+			_counter++;
 
-		public Vector3Reference Position => position;
+			GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
 
-		public FloatReference DelayTime => delayTime;
+			AudioSource audioSource = audioSourceGameObject.AddComponent<AudioSource>();
+			audioSource.clip = clip;
 
-		public AudioRolloffMode RolloffMode => rolloffMode;
+			SetAudioParameters(audioSource);
 
-		public float MaxDistance => maxDistance;
+			if (!loop) {
+				UnityEngine.GameObject.Destroy(audioSource.gameObject, audioSource.clip.length);
+			}
 
-		public bool Loop => loop;
+			if (delay.Value > 0) {
+				audioSource.PlayDelayed(delay.Value);
+			}
+			else {
+				audioSource.Play();
+			}
+		}
+
+		private bool CanPlay() {
+			if (!clip) {
+				return false;
+			}
+
+			if (ClipLastTimePlayed.TryGetValue(this, out float lastTimePlayed)) {
+				if (!CheckHasReachedDelay(lastTimePlayed, delayBetweenPlays.Value)) {
+					return false;
+				}
+
+				UpdateLastTimePlayed();
+			}
+			else if (delayBetweenPlays > 0) {
+				UpdateLastTimePlayed();
+			}
+
+			return true;
+		}
+
+		private void UpdateLastTimePlayed() {
+			ClipLastTimePlayed[this] = Time.time;
+		}
+
+		private static bool CheckHasReachedDelay(float lastTimePlayed, float delayBetweenPlays) {
+			return lastTimePlayed + delayBetweenPlays < Time.time;
+		}
+
+		private void SetAudioParameters(AudioSource audioSource) {
+			if (audioMixerGroup != null) {
+				audioSource.outputAudioMixerGroup = audioMixerGroup;
+			}
+
+			if (maxDistance > 0) {
+				audioSource.maxDistance = maxDistance;
+			}
+
+			audioSource.pitch = pitch.Random();
+
+			if (position != null) {
+				audioSource.gameObject.transform.position = position.Value;
+			}
+
+			audioSource.rolloffMode = rolloffMode;
+
+			audioSource.volume = volume.Random();
+
+			audioSource.loop = loop;
+		}
 	}
 }
