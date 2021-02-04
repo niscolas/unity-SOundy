@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Assets.Plugins.AudioUtils;
+using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using Plugins.ClassExtensions.UnityExtensions;
 using UnityAtoms.BaseAtoms;
@@ -27,6 +28,9 @@ namespace Plugins.AudioUtils {
 		private Vector2 pitch;
 
 		[SerializeField]
+		private int playTimes = 1;
+
+		[SerializeField]
 		private Vector3Reference position;
 
 		[FormerlySerializedAs("delayTime")]
@@ -49,29 +53,33 @@ namespace Plugins.AudioUtils {
 
 		private static int _counter;
 
-		public void Play() {
+		public async void Play() {
 			if (!CanPlay()) {
 				return;
 			}
 
-			_counter++;
+			for (int i = 0; i < playTimes; i++) {
+				_counter++;
 
-			GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
+				GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
 
-			AudioSource audioSource = audioSourceGameObject.AddComponent<AudioSource>();
-			audioSource.clip = clip;
+				AudioSource audioSource = audioSourceGameObject.AddComponent<AudioSource>();
+				audioSource.clip = clip;
 
-			SetAudioParameters(audioSource);
+				SetAudioParameters(audioSource);
 
-			if (!loop) {
-				UnityEngine.GameObject.Destroy(audioSource.gameObject, audioSource.clip.length);
-			}
+				if (!loop) {
+					UnityEngine.GameObject.Destroy(audioSource.gameObject, audioSource.clip.length);
+				}
 
-			if (delay.Value > 0) {
-				audioSource.PlayDelayed(delay.Value);
-			}
-			else {
-				audioSource.Play();
+				if (delay.Value > 0) {
+					audioSource.PlayDelayed(delay.Value);
+				}
+				else {
+					audioSource.Play();
+				}
+
+				await UniTask.Delay(TimeSpan.FromSeconds(clip.length));
 			}
 		}
 
