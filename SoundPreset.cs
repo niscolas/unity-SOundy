@@ -2,52 +2,78 @@
 using System.Collections.Generic;
 using Assets.Plugins.AudioUtils;
 using Cysharp.Threading.Tasks;
-using NaughtyAttributes;
+using Plugins.ClassExtensions.CsharpExtensions;
 using Plugins.ClassExtensions.UnityExtensions;
+#if ODIN_INSPECTOR
+using Plugins.OdinUtils;
+#endif
+using Sirenix.OdinInspector;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Serialization;
 
 namespace Plugins.AudioUtils {
-	[CreateAssetMenu(
-		menuName = "Sound Preset", order = Constants.CreateAssetMenuOrder)]
+	[CreateAssetMenu(menuName = "Sound Preset", order = Constants.CreateAssetMenuOrder)]
 	public class SoundPreset : ScriptableObject {
+		[Title("Sound Preset")]
+		[InlineEditor(InlineEditorModes.SmallPreview)]
+#if ODIN_INSPECTOR
+		[NotEmpty]
+#endif
+		[PropertySpace(SpaceAfter = 15)]
 		[SerializeField]
-		private AudioClip clip;
+		private AudioClip[] clips;
 
+		[TabGroup("Data", "Basic")]
 		[SerializeField]
 		private AudioMixerGroup audioMixerGroup;
 
-		[MinMaxSlider(0, 2)]
+		[TabGroup("Data", "Basic")]
+		[MinMaxSlider(0.1f, 2, true)]
 		[SerializeField]
 		private Vector2 volume;
 
-		[MinMaxSlider(0, 3)]
+		[TabGroup("Data", "Advanced")]
+		[MinMaxSlider(0.1f, 3, true)]
 		[SerializeField]
 		private Vector2 pitch;
 
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/Time Settings")]
+		[SerializeField]
+		private bool loop;
+
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/Time Settings")]
 		[SerializeField]
 		private int playTimes = 1;
 
-		[SerializeField]
-		private Vector3Reference position;
-
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/Time Settings")]
 		[FormerlySerializedAs("delayTime")]
 		[SerializeField]
 		private FloatReference delay;
 
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/Time Settings")]
 		[SerializeField]
 		private FloatReference delayBetweenPlays;
 
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/3D")]
+		[SerializeField]
+		private Vector3Reference position;
+
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/3D")]
 		[SerializeField]
 		private AudioRolloffMode rolloffMode;
 
+		[TabGroup("Data", "Advanced")]
+		[BoxGroup("Data/Advanced/3D")]
 		[SerializeField]
 		private float maxDistance = -1;
-
-		[SerializeField]
-		private bool loop;
 
 		private static readonly Dictionary<SoundPreset, float> ClipLastTimePlayed = new Dictionary<SoundPreset, float>();
 
@@ -64,12 +90,13 @@ namespace Plugins.AudioUtils {
 				GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
 
 				AudioSource audioSource = audioSourceGameObject.AddComponent<AudioSource>();
+				AudioClip clip = clips.GetRandomElement();
 				audioSource.clip = clip;
 
 				SetAudioParameters(audioSource);
 
 				if (!loop) {
-					UnityEngine.GameObject.Destroy(audioSource.gameObject, audioSource.clip.length);
+					Destroy(audioSource.gameObject, audioSource.clip.length);
 				}
 
 				if (delay.Value > 0) {
@@ -84,7 +111,7 @@ namespace Plugins.AudioUtils {
 		}
 
 		private bool CanPlay() {
-			if (!clip) {
+			if (!clips.IsNullOrEmpty()) {
 				return false;
 			}
 
