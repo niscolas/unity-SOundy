@@ -111,7 +111,7 @@ namespace Plugins.AudioUtils {
 		}
 
 		private bool CanPlay() {
-			if (!clips.IsNullOrEmpty()) {
+			if (clips.IsNullOrEmpty()) {
 				return false;
 			}
 
