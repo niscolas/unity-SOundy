@@ -4,8 +4,8 @@ using Assets.Plugins.AudioUtils;
 using Cysharp.Threading.Tasks;
 using Plugins.ClassExtensions.CsharpExtensions;
 using Plugins.ClassExtensions.UnityExtensions;
+using Plugins.OdinUtils.Editor.Attributes;
 #if ODIN_INSPECTOR
-using Plugins.OdinUtils;
 #endif
 using Sirenix.OdinInspector;
 using UnityAtoms.BaseAtoms;
@@ -32,12 +32,12 @@ namespace Plugins.AudioUtils {
 		[TabGroup("Data", "Basic")]
 		[MinMaxSlider(0.1f, 2, true)]
 		[SerializeField]
-		private Vector2 volume;
+		private Vector2 volume = Vector2.one;
 
 		[TabGroup("Data", "Advanced")]
 		[MinMaxSlider(0.1f, 3, true)]
 		[SerializeField]
-		private Vector2 pitch;
+		private Vector2 pitch = Vector2.one;
 
 		[TabGroup("Data", "Advanced")]
 		[BoxGroup("Data/Advanced/Time Settings")]
@@ -90,7 +90,7 @@ namespace Plugins.AudioUtils {
 				GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
 
 				AudioSource audioSource = audioSourceGameObject.AddComponent<AudioSource>();
-				AudioClip clip = clips.GetRandomElement();
+				AudioClip clip = clips.RandomElement();
 				audioSource.clip = clip;
 
 				SetAudioParameters(audioSource);
