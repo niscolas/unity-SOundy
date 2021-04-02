@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Plugins.AudioUtils;
 using Cysharp.Threading.Tasks;
-using Plugins.ClassExtensions.CsharpExtensions;
-using Plugins.ClassExtensions.UnityExtensions;
-using Plugins.OdinUtils.Editor.Attributes;
-#if ODIN_INSPECTOR
-#endif
 using Sirenix.OdinInspector;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Serialization;
+using UnityExtensions;
 
-namespace Plugins.AudioUtils {
-	[CreateAssetMenu(menuName = "Sound Preset", order = Constants.CreateAssetMenuOrder)]
-	public class SoundPreset : ScriptableObject {
+namespace SoundPreset
+{
+	[CreateAssetMenu(
+		menuName = "Sound Preset", 
+		order = Constants.CreateAssetMenuOrder)]
+	public class SoundPreset : ScriptableObject
+	{
 		[Title("Sound Preset")]
 		[InlineEditor(InlineEditorModes.SmallPreview)]
-#if ODIN_INSPECTOR
-		[NotEmpty]
-#endif
 		[PropertySpace(SpaceAfter = 15)]
 		[SerializeField]
 		private AudioClip[] clips;
@@ -79,12 +75,15 @@ namespace Plugins.AudioUtils {
 
 		private static int _counter;
 
-		public async void Play() {
-			if (!CanPlay()) {
+		public async void Play()
+		{
+			if (!CanPlay())
+			{
 				return;
 			}
 
-			for (int i = 0; i < playTimes; i++) {
+			for (int i = 0; i < playTimes; i++)
+			{
 				_counter++;
 
 				GameObject audioSourceGameObject = new GameObject($"Sound{_counter}");
@@ -95,14 +94,17 @@ namespace Plugins.AudioUtils {
 
 				SetAudioParameters(audioSource);
 
-				if (!loop) {
+				if (!loop)
+				{
 					Destroy(audioSource.gameObject, audioSource.clip.length);
 				}
 
-				if (delay.Value > 0) {
+				if (delay.Value > 0)
+				{
 					audioSource.PlayDelayed(delay.Value);
 				}
-				else {
+				else
+				{
 					audioSource.Play();
 				}
 
@@ -110,45 +112,56 @@ namespace Plugins.AudioUtils {
 			}
 		}
 
-		private bool CanPlay() {
-			if (clips.IsNullOrEmpty()) {
+		private bool CanPlay()
+		{
+			if (clips.IsNullOrEmpty())
+			{
 				return false;
 			}
 
-			if (ClipLastTimePlayed.TryGetValue(this, out float lastTimePlayed)) {
-				if (!CheckHasReachedDelay(lastTimePlayed, delayBetweenPlays.Value)) {
+			if (ClipLastTimePlayed.TryGetValue(this, out float lastTimePlayed))
+			{
+				if (!CheckHasReachedDelay(lastTimePlayed, delayBetweenPlays.Value))
+				{
 					return false;
 				}
 
 				UpdateLastTimePlayed();
 			}
-			else if (delayBetweenPlays > 0) {
+			else if (delayBetweenPlays > 0)
+			{
 				UpdateLastTimePlayed();
 			}
 
 			return true;
 		}
 
-		private void UpdateLastTimePlayed() {
+		private void UpdateLastTimePlayed()
+		{
 			ClipLastTimePlayed[this] = Time.time;
 		}
 
-		private static bool CheckHasReachedDelay(float lastTimePlayed, float delayBetweenPlays) {
+		private static bool CheckHasReachedDelay(float lastTimePlayed, float delayBetweenPlays)
+		{
 			return lastTimePlayed + delayBetweenPlays < Time.time;
 		}
 
-		private void SetAudioParameters(AudioSource audioSource) {
-			if (audioMixerGroup != null) {
+		private void SetAudioParameters(AudioSource audioSource)
+		{
+			if (audioMixerGroup != null)
+			{
 				audioSource.outputAudioMixerGroup = audioMixerGroup;
 			}
 
-			if (maxDistance > 0) {
+			if (maxDistance > 0)
+			{
 				audioSource.maxDistance = maxDistance;
 			}
 
 			audioSource.pitch = pitch.Random();
 
-			if (position != null) {
+			if (position != null)
+			{
 				audioSource.gameObject.transform.position = position.Value;
 			}
 
