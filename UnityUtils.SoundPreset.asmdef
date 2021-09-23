@@ -2,10 +2,10 @@
     "name": "UnityUtils.SoundPreset",
     "rootNamespace": "",
     "references": [
-        "GUID:a8d015c3e0000b8498299a9f0decdd0d",
         "GUID:29492541a59d04a81b47a7f225e8a22d",
         "GUID:14165214884ae4a619bfb290f28194a7",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:9104f28baed89644286c65222185ea59"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
