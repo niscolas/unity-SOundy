@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AudioUtils;
 using Cysharp.Threading.Tasks;
-using niscolas.UnityExtensions;
+using niscolas.UnityUtils.Core.Extensions;
 using Sirenix.OdinInspector;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
