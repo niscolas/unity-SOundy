@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using niscolas.UnityUtils.Core.Extensions;
+using Sirenix.OdinInspector;
+using SOundy;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
-namespace SOundy
+namespace niscolas.SOundy
 {
     [CreateAssetMenu(
         fileName = "SOundy",
         menuName = Constants.CreateAssetMenuPrefix + "SOundy Asset",
         order = Constants.CreateAssetMenuOrder)]
-    public partial class SOundyAsset : ScriptableObject
+    public class SOundyAssetSO : ScriptableObject
     {
 #if ODIN_INSPECTOR
         [Title("Sound Preset")]
@@ -59,8 +62,8 @@ namespace SOundy
 #if ODIN_INSPECTOR
         [TabGroup("Data", "Advanced")]
         [BoxGroup("Data/Advanced/Time Settings")]
-        [FormerlySerializedAs("delayTime")]
 #endif
+        [FormerlySerializedAs("delayTime")]
         [SerializeField]
         private FloatReference _delay = new FloatReference();
 
@@ -92,8 +95,8 @@ namespace SOundy
         [SerializeField]
         private FloatReference _maxDistance = new FloatReference(-1);
 
-        private static readonly Dictionary<SOundyAsset, float> ClipLastTimePlayed =
-            new Dictionary<SOundyAsset, float>();
+        private static readonly Dictionary<SOundyAssetSO, float> ClipLastTimePlayed =
+            new Dictionary<SOundyAssetSO, float>();
 
         private static int _counter;
 
